@@ -10,6 +10,11 @@ from texts import HELP_TEXT
 import bypasser
 from ddl import ddllist, direct_link_generator
 
+AUTHORIZED_CHATS = [
+    -1001937487093,  # Replace this with the chat ID of the authorized chat
+    "your_authorized_username",  # Replace this with the username of the authorized chat
+    # Add more chat IDs or usernames as needed
+]
 
 # bot
 with open('config.json', 'r') as f: DATA = load(f)
@@ -18,8 +23,7 @@ def getenv(var): return environ.get(var) or DATA.get(var, None)
 bot_token = getenv("TOKEN")
 api_hash = getenv("HASH") 
 api_id = getenv("ID")
-authorized_chats = getenv("AUTHORIZED_CHATS")
-app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token,authorized_chats=authorized_chats)  
+app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token)  
 
 
 # handle ineex
