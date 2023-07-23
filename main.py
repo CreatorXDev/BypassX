@@ -16,6 +16,8 @@ AUTHORIZED_CHATS = [
     # Add more chat IDs or usernames as needed
 ]
 
+BOT_OWNER_ID = 918773603  # Replace this with the actual bot owner ID
+
 # bot
 with open('config.json', 'r') as f: DATA = load(f)
 def getenv(var): return environ.get(var) or DATA.get(var, None)
@@ -102,7 +104,7 @@ def send_help(client: pyrogram.client.Client, message: pyrogram.types.messages_a
 
 
 # links
-@app.on_message(filters.text & filters.chat(AUTHORIZED_CHATS))
+@app.on_message(filters.text & filters.chat(AUTHORIZED_CHATS) & filters.user(BOT_OWNER_ID))
 def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     bypass = Thread(target=lambda: loopthread(message), daemon=True)
     bypass.start()
@@ -120,7 +122,7 @@ def docthread(message):
 
 
 # files
-@app.on_message(filters.document & filters.chat(AUTHORIZED_CHATS) | filters.photo & filters.chat(AUTHORIZED_CHATS) | filters.video & filters.chat(AUTHORIZED_CHATS))
+@app.on_message(filters.document & filters.chat(AUTHORIZED_CHATS) & filters.user(BOT_OWNER_ID) | filters.photo & filters.chat(AUTHORIZED_CHATS) & filters.user(BOT_OWNER_ID) | filters.video & filters.chat(AUTHORIZED_CHATS) & filters.user(BOT_OWNER_ID))
 def docfile(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
 
     try:
