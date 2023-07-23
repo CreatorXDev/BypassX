@@ -11,11 +11,13 @@ import bypasser
 from ddl import ddllist, direct_link_generator
 
 
-authorized_chats = [-1001937487093]
-owner_user_id = 918773603 
+AUTHORIZED_CHATS = [-1001937487093, -918773603]
 
 # bot
-with open('config.json', 'r') as f: DATA = load(f)
+with open('config.json', 'r') as f:
+    DATA = load(f)
+
+
 def getenv(var): return environ.get(var) or DATA.get(var, None)
 
 bot_token = getenv("TOKEN")
@@ -24,6 +26,10 @@ api_id = getenv("ID")
 app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token)  
 
 
+# Check if the chat is authorized
+def is_authorized_chat(chat_id):
+    return chat_id in AUTHORIZED_CHATS
+    
 # handle ineex
 def handleIndex(ele,message,msg):
     result = bypasser.scrapeIndex(ele)
@@ -96,17 +102,17 @@ def send_start(client: pyrogram.client.Client, message: pyrogram.types.messages_
 # help command
 @app.on_message(filters.command(["help"]))
 def send_help(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    if not is_authorized_chat(message.chat.id):
+        return
     app.send_message(message.chat.id, HELP_TEXT, reply_to_message_id=message.id, disable_web_page_preview=True)
-
 
 # links
 @app.on_message(filters.text)
 def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    # Check if the chat is authorized and the user is the owner
-    if message.chat.id in authorized_chats and message.from_user.id == owner_user_id:
-        bypass = Thread(target=lambda: loopthread(message), daemon=True)
-        bypass.start()
-
+    if not is_authorized_chat(message.chat.id):
+        return
+    bypass = Thread(target=lambda: loopthread(message), daemon=True)
+    bypass.start()
 
 # doc thread
 def docthread(message):
@@ -122,19 +128,19 @@ def docthread(message):
 # files
 @app.on_message([filters.document, filters.photo, filters.video])
 def docfile(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    # Check if the chat is authorized and the user is the owner
-    if message.chat.id in authorized_chats and message.from_user.id == owner_user_id:
-        try:
-            if message.document.file_name.endswith("dlc"):
-                bypass = Thread(target=lambda: docthread(message), daemon=True)
-                bypass.start()
-                return
-        except:
-            pass
+    if not is_authorized_chat(message.chat.id):
+        return
 
-        bypass = Thread(target=lambda: loopthread(message, True), daemon=True)
-        bypass.start()
+    try:
+        if message.document.file_name.endswith("dlc"):
+            bypass = Thread(target=lambda: docthread(message), daemon=True)
+            bypass.start()
+            return
+    except:
+        pass
 
+    bypass = Thread(target=lambda: loopthread(message, True), daemon=True)
+    bypass.start()
 
 # server loop
 print("Bot Starting")
