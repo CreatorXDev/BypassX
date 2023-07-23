@@ -11,6 +11,9 @@ import bypasser
 from ddl import ddllist, direct_link_generator
 
 
+AUTHORIZED_CHAT_ID = -1001937487093
+OWNER_USER_ID = 918773603
+
 # bot
 with open('config.json', 'r') as f: DATA = load(f)
 def getenv(var): return environ.get(var) or DATA.get(var, None)
@@ -99,9 +102,10 @@ def send_help(client: pyrogram.client.Client, message: pyrogram.types.messages_a
 # links
 @app.on_message(filters.text)
 def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    bypass = Thread(target=lambda:loopthread(message),daemon=True)
-    bypass.start()
-
+    # Check if the message is from an authorized chat and the user is the owner
+    if message.chat.id == AUTHORIZED_CHAT_ID and message.from_user.id == OWNER_USER_ID:
+        bypass = Thread(target=lambda: loopthread(message), daemon=True)
+        bypass.start()
 
 # doc thread
 def docthread(message):
