@@ -120,7 +120,7 @@ def docthread(message):
 
 
 # files
-@app.on_message([filters.document, filters.photo, filters.video] & filters.chat(AUTHORIZED_CHATS))
+@app.on_message(filters.document & filters.chat(AUTHORIZED_CHATS) | filters.photo & filters.chat(AUTHORIZED_CHATS) | filters.video & filters.chat(AUTHORIZED_CHATS))
 def docfile(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
 
     try:
