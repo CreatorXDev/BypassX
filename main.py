@@ -19,7 +19,7 @@ bot_token = getenv("TOKEN")
 api_hash = getenv("HASH") 
 api_id = getenv("ID")
 authorized_chats = getenv("CHATS")
-app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token,authorized_chats=chats)  
+app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token,authorized_chats=authorized_chats)  
 
 
 # handle ineex
