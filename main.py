@@ -11,8 +11,8 @@ import bypasser
 from ddl import ddllist, direct_link_generator
 
 
-AUTHORIZED_CHAT_ID = -1001937487093
-OWNER_USER_ID = 918773603
+authorized_chats = [-1001937487093]
+owner_user_id = 918773603 
 
 # bot
 with open('config.json', 'r') as f: DATA = load(f)
@@ -102,10 +102,11 @@ def send_help(client: pyrogram.client.Client, message: pyrogram.types.messages_a
 # links
 @app.on_message(filters.text)
 def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    # Check if the message is from an authorized chat and the user is the owner
-    if message.chat.id == AUTHORIZED_CHAT_ID and message.from_user.id == OWNER_USER_ID:
+    # Check if the chat is authorized and the user is the owner
+    if message.chat.id in authorized_chats and message.from_user.id == owner_user_id:
         bypass = Thread(target=lambda: loopthread(message), daemon=True)
         bypass.start()
+
 
 # doc thread
 def docthread(message):
@@ -119,18 +120,20 @@ def docthread(message):
 
 
 # files
-@app.on_message([filters.document,filters.photo,filters.video])
+@app.on_message([filters.document, filters.photo, filters.video])
 def docfile(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    
-    try:
-        if message.document.file_name.endswith("dlc"):
-            bypass = Thread(target=lambda:docthread(message),daemon=True)
-            bypass.start()
-            return
-    except: pass
+    # Check if the chat is authorized and the user is the owner
+    if message.chat.id in authorized_chats and message.from_user.id == owner_user_id:
+        try:
+            if message.document.file_name.endswith("dlc"):
+                bypass = Thread(target=lambda: docthread(message), daemon=True)
+                bypass.start()
+                return
+        except:
+            pass
 
-    bypass = Thread(target=lambda:loopthread(message,True),daemon=True)
-    bypass.start()
+        bypass = Thread(target=lambda: loopthread(message, True), daemon=True)
+        bypass.start()
 
 
 # server loop
