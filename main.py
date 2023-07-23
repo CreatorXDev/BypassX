@@ -1,6 +1,6 @@
 import pyrogram
-from pyrogram import Client,filters
-from pyrogram.types import InlineKeyboardMarkup,InlineKeyboardButton
+from pyrogram import Client, filters
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from os import environ, remove
 from threading import Thread
 from json import load
@@ -106,22 +106,16 @@ def send_help(client: pyrogram.client.Client, message: pyrogram.types.messages_a
 
 
 # links
-@app.on_message(filters.text & filters.chat(AUTHORIZED_CHATS) & filters.user(BOT_OWNER_ID))
-def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    user_id = message.from_user.id
-    chat_id = message.chat.id
-
-    # Check if the user is not the bot owner and not in the authorized chat
-    if user_id != BOT_OWNER_ID and chat_id not in AUTHORIZED_CHATS:
-        # Prompt the user to join the required channel or group
-        app.send_message(user_id, f"Please join the required channel or group: {FORCE_SUB_CHANNEL}")
-        return
-
-    # If the user is the bot owner or in an authorized chat, continue with processing
+@app.on_message(filters.text & filters.chat(-1001937487093) & ~filters.private)  # Authorized chat
+def receive_authorized_chat(client, message):
     bypass = Thread(target=lambda: loopthread(message), daemon=True)
     bypass.start()
 
-
+@app.on_message(filters.text & filters.private)  # Bot owner's PM
+def receive_pm(client, message):
+    bypass = Thread(target=lambda: loopthread(message), daemon=True)
+    bypass.start()
+    
 # doc thread
 def docthread(message):
     msg = app.send_message(message.chat.id, "🔎 __bypassing...__", reply_to_message_id=message.id)
