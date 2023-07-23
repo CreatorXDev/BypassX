@@ -1,6 +1,6 @@
 import pyrogram
-from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram import Client,filters
+from pyrogram.types import InlineKeyboardMarkup,InlineKeyboardButton
 from os import environ, remove
 from threading import Thread
 from json import load
@@ -10,15 +10,6 @@ from texts import HELP_TEXT
 import bypasser
 from ddl import ddllist, direct_link_generator
 
-AUTHORIZED_CHATS = [
-    -1001937487093,  # Replace this with the chat ID of the authorized chat
-    "your_authorized_username",  # Replace this with the username of the authorized chat
-    # Add more chat IDs or usernames as needed
-]
-
-BOT_OWNER_ID = 918773603  # Replace this with the actual bot owner ID
-
-FORCE_SUB_CHANNEL = "-1001630806666"
 
 # bot
 with open('config.json', 'r') as f: DATA = load(f)
@@ -106,16 +97,12 @@ def send_help(client: pyrogram.client.Client, message: pyrogram.types.messages_a
 
 
 # links
-@app.on_message(filters.text & filters.chat(-1001937487093) & ~filters.private)  # Authorized chat
-def receive_authorized_chat(client, message):
-    bypass = Thread(target=lambda: loopthread(message), daemon=True)
+@app.on_message(filters.text)
+def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    bypass = Thread(target=lambda:loopthread(message),daemon=True)
     bypass.start()
 
-@app.on_message(filters.text & filters.private)  # Bot owner's PM
-def receive_pm(client, message):
-    bypass = Thread(target=lambda: loopthread(message), daemon=True)
-    bypass.start()
-    
+
 # doc thread
 def docthread(message):
     msg = app.send_message(message.chat.id, "🔎 __bypassing...__", reply_to_message_id=message.id)
@@ -128,19 +115,19 @@ def docthread(message):
 
 
 # files
-@app.on_message(filters.document & filters.chat(AUTHORIZED_CHATS) & filters.user(BOT_OWNER_ID) | filters.photo & filters.chat(AUTHORIZED_CHATS) & filters.user(BOT_OWNER_ID) | filters.video & filters.chat(AUTHORIZED_CHATS) & filters.user(BOT_OWNER_ID))
+@app.on_message([filters.document,filters.photo,filters.video])
 def docfile(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-
+    
     try:
         if message.document.file_name.endswith("dlc"):
-            bypass = Thread(target=lambda: docthread(message), daemon=True)
+            bypass = Thread(target=lambda:docthread(message),daemon=True)
             bypass.start()
             return
-    except:
-        pass
+    except: pass
 
-    bypass = Thread(target=lambda: loopthread(message, True), daemon=True)
+    bypass = Thread(target=lambda:loopthread(message,True),daemon=True)
     bypass.start()
+
 
 # server loop
 print("Bot Starting")
