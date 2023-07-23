@@ -18,6 +18,8 @@ AUTHORIZED_CHATS = [
 
 BOT_OWNER_ID = 918773603  # Replace this with the actual bot owner ID
 
+FORCE_SUB_CHANNEL = "-1001630806666"
+
 # bot
 with open('config.json', 'r') as f: DATA = load(f)
 def getenv(var): return environ.get(var) or DATA.get(var, None)
@@ -106,6 +108,16 @@ def send_help(client: pyrogram.client.Client, message: pyrogram.types.messages_a
 # links
 @app.on_message(filters.text & filters.chat(AUTHORIZED_CHATS) & filters.user(BOT_OWNER_ID))
 def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+
+    # Check if the user is not the bot owner and not in the authorized chat
+    if user_id != BOT_OWNER_ID and chat_id not in AUTHORIZED_CHATS:
+        # Prompt the user to join the required channel or group
+        app.send_message(user_id, f"Please join the required channel or group: {FORCE_SUB_CHANNEL}")
+        return
+
+    # If the user is the bot owner or in an authorized chat, continue with processing
     bypass = Thread(target=lambda: loopthread(message), daemon=True)
     bypass.start()
 
