@@ -18,7 +18,8 @@ def getenv(var): return environ.get(var) or DATA.get(var, None)
 bot_token = getenv("TOKEN")
 api_hash = getenv("HASH") 
 api_id = getenv("ID")
-app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token)  
+AUTHORIZED_CHATS = getenv("CHATS")
+app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token,authorized_chats=chats)  
 
 
 # handle ineex
@@ -97,9 +98,9 @@ def send_help(client: pyrogram.client.Client, message: pyrogram.types.messages_a
 
 
 # links
-@app.on_message(filters.text)
+@app.on_message(filters.text & filters.chat(AUTHORIZED_CHATS))
 def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    bypass = Thread(target=lambda:loopthread(message),daemon=True)
+    bypass = Thread(target=lambda: loopthread(message), daemon=True)
     bypass.start()
 
 
@@ -115,19 +116,19 @@ def docthread(message):
 
 
 # files
-@app.on_message([filters.document,filters.photo,filters.video])
+@app.on_message([filters.document, filters.photo, filters.video] & filters.chat(AUTHORIZED_CHATS))
 def docfile(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    
+
     try:
         if message.document.file_name.endswith("dlc"):
-            bypass = Thread(target=lambda:docthread(message),daemon=True)
+            bypass = Thread(target=lambda: docthread(message), daemon=True)
             bypass.start()
             return
-    except: pass
+    except:
+        pass
 
-    bypass = Thread(target=lambda:loopthread(message,True),daemon=True)
+    bypass = Thread(target=lambda: loopthread(message, True), daemon=True)
     bypass.start()
-
 
 # server loop
 print("Bot Starting")
