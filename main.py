@@ -84,7 +84,7 @@ def loopthread(message,otherss=False):
 
 
 # start command
-@bot.on_message(filters.command('start') & filters.private)
+@app.on_message(filters.command('start') & filters.private)
 async def start(bot, message):
     if FORCE_CHNL:
         try:
