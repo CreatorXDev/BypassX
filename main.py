@@ -11,8 +11,6 @@ import bypasser
 from ddl import ddllist, direct_link_generator
 
 
-force_sub_channel_id = "-1001871763971"
-
 # bot
 with open('config.json', 'r') as f: DATA = load(f)
 def getenv(var): return environ.get(var) or DATA.get(var, None)
@@ -85,18 +83,11 @@ def loopthread(message,otherss=False):
 # start command
 @app.on_message(filters.command(["start"]))
 def send_start(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    # Check if the message is from a private chat
-    if message.chat.type == "private":
-        # Send a message inviting the user to join the force sub channel
-        app.send_message(message.chat.id, f"__To use this bot, please join our force sub channel: t.me/{force_sub_channel_id}__",
-                         reply_to_message_id=message.id)
-    else:
-        # Send the regular start message for non-private chats
-        app.send_message(message.chat.id, f"__👋 Hi **{message.from_user.mention}**, i am Link Bypasser Bot, just send me any supported links and i will you get you results.\nCheckout /help to Read More__",
-                         reply_markup=InlineKeyboardMarkup([
-                             [ InlineKeyboardButton("🌐 Source Code", url="https://github.com/bipinkrish/Link-Bypasser-Bot")],
-                             [ InlineKeyboardButton("Replit", url="https://replit.com/@bipinkrish/Link-Bypasser#app.py") ]]),
-                         reply_to_message_id=message.id)
+    app.send_message(message.chat.id, f"__👋 Hi **{message.from_user.mention}**, i am Link Bypasser Bot, just send me any supported links and i will you get you results.\nCheckout /help to Read More__",
+    reply_markup=InlineKeyboardMarkup([
+        [ InlineKeyboardButton("🌐 Source Code", url="https://github.com/bipinkrish/Link-Bypasser-Bot")],
+        [ InlineKeyboardButton("Replit", url="https://replit.com/@bipinkrish/Link-Bypasser#app.py") ]]), 
+        reply_to_message_id=message.id)
 
 
 # help command
