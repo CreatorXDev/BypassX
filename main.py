@@ -1,29 +1,15 @@
-import logging
 import pyrogram
 from pyrogram import Client,filters
-from pyrogram.errors import UserNotParticipant, FloodWait
 from pyrogram.types import InlineKeyboardMarkup,InlineKeyboardButton
 from os import environ, remove
 from threading import Thread
 from json import load
 from re import search
-from bs4 import BeautifulSoup
 
 from texts import HELP_TEXT
 import bypasser
 from ddl import ddllist, direct_link_generator
 
-
-logging.basicConfig(level=logging.INFO)
-for log_name, log_obj in logging.Logger.manager.loggerDict.items():
-     if log_name != 'pyrogram':
-          log_obj.disabled = True
-
-LOGGER = logging.getLogger(__name__)
-
-
-FORCE_CHNL = "HyperX_Updates"
-CHNL_ID = -1001871763971
 
 # bot
 with open('config.json', 'r') as f: DATA = load(f)
@@ -33,16 +19,6 @@ bot_token = getenv("TOKEN")
 api_hash = getenv("HASH") 
 api_id = getenv("ID")
 app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token)  
-
-
-async def send_log(chat_id: Chat, text: str):
-    try:
-        await bot.send_message(chat_id=chat_id, text=text)
-    except FloodWait as f:
-        sleep(f.x * 1)
-        return send_log(chat_id, text)
-    except Exception as e:
-        LOGGER.error(str(e))
 
 
 # handle ineex
@@ -105,32 +81,13 @@ def loopthread(message,otherss=False):
 
 
 # start command
-@app.on_message(filters.command('start') & filters.private)
-async def start(bot, message):
-    if FORCE_CHNL:
-        try:
-            user = await bot.get_chat_member(FORCE_CHNL, message.from_user.id)
-            if user.status == "kicked out":
-                await message.reply_text(f"You Are Banned\nContact @sai0909 To get Unbanned")
-                return
-        except UserNotParticipant:
-            await message.reply_text(
-                text = f"You Haven't Joined My Updates Channel @{FORCE_CHNL}\n\n Join It Using Below Link",
-                reply_markup = InlineKeyboardMarkup([[
-                    InlineKeyboardButton("UPDATES CHANNEL", url=f"t.me/{FORCE_CHNL}")
-                ]])
-            )
-            return
-    LOGGER.info(f"{message.chat.first_name} Just Started me")
-    text = f"Hey {message.chat.first_name}\n\n I'm A public link generator bot.\n\nFollowing are the supported sites\n\n<b>1.GDTOT\n2.Appdrive/Driveapp\n3.HubDrive\n4.KatDrive\n5.kolop"
-    BUTTONS = [
-        [
-            InlineKeyboardButton("UPDATES CHANNEL", url=f"t.me/{FORCE_CHNL}"),
-            InlineKeyboardButton("CONTACT OWNER", url=f"t.me/{conatact}")
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(BUTTONS)
-    await message.reply((text), reply_markup=reply_markup)
+@app.on_message(filters.command(["start"]))
+def send_start(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    app.send_message(message.chat.id, f"__👋 Hi **{message.from_user.mention}**, i am Link Bypasser Bot, just send me any supported links and i will you get you results.\nCheckout /help to Read More__",
+    reply_markup=InlineKeyboardMarkup([
+        [ InlineKeyboardButton("🌐 Source Code", url="https://github.com/bipinkrish/Link-Bypasser-Bot")],
+        [ InlineKeyboardButton("Replit", url="https://replit.com/@bipinkrish/Link-Bypasser#app.py") ]]), 
+        reply_to_message_id=message.id)
 
 
 # help command
