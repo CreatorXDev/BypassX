@@ -210,37 +210,20 @@ def psa_bypasser(psa_url):
 ##################################################################################################################
 # rocklinks
 
-def rocklinks(url):
-    client = cloudscraper.create_scraper(allow_brotli=False)
-    if 'rocklinks.net' in url:
-        DOMAIN = "https://blog.disheye.com"
-    else:
-        DOMAIN = "https://rocklinks.net"
-
-    url = url[:-1] if url[-1] == '/' else url
-
-    code = url.split("/")[-1]
-    if 'rocklinks.net' in url:
-        final_url = f"{DOMAIN}/{code}?quelle=" 
-    else:
-        final_url = f"{DOMAIN}/{code}"
-
-    resp = client.get(final_url)
-    soup = BeautifulSoup(resp.content, "html.parser")
-    
-    try: inputs = soup.find(id="go-link").find_all(name="input")
-    except: return "Incorrect Link"
-    
-    data = { input.get('name'): input.get('value') for input in inputs }
-
-    h = { "x-requested-with": "XMLHttpRequest" }
-    
-    time.sleep(10)
-    r = client.post(f"{DOMAIN}/links/go", data=data, headers=h)
-    try:
-        return r.json()['url']
-    except: return "Something went wrong :("
-
+def rocklinks(url: str):
+   with requests.Session() as client:
+      if "toonworld4all" in url:
+         url = client.get(url).url
+      code = url.split("/")[-1]
+      DOMAIN = 'https://share.techymedies.com/'
+      resp = client.get(DOMAIN+code, headers={"referer": 'https://disheye.com/'})
+      soup = BeautifulSoup(resp.content, "html.parser")
+      inputs = soup.find(id="go-link").find_all(name="input")
+      data = { input.get('name'): input.get('value') for input in inputs }
+      h = { "x-requested-with": "XMLHttpRequest" }
+      sleep(10)
+      r = client.post(f"{DOMAIN}links/go", data=data, headers=h)
+      return r.json()['url']
 
 ################################################
 # igg games
