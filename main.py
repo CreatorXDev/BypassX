@@ -35,6 +35,16 @@ api_id = getenv("ID")
 app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token)  
 
 
+async def send_log(chat_id: Chat, text: str):
+    try:
+        await bot.send_message(chat_id=chat_id, text=text)
+    except FloodWait as f:
+        sleep(f.x * 1)
+        return send_log(chat_id, text)
+    except Exception as e:
+        LOGGER.error(str(e))
+
+
 # handle ineex
 def handleIndex(ele,message,msg):
     result = bypasser.scrapeIndex(ele)
