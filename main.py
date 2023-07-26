@@ -1,5 +1,6 @@
 import pyrogram
 from pyrogram import Client,filters
+from pyrogram.errors import UserNotParticipant, FloodWait
 from pyrogram.types import InlineKeyboardMarkup,InlineKeyboardButton
 from os import environ, remove
 from threading import Thread
