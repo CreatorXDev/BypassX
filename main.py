@@ -10,7 +10,22 @@ from texts import HELP_TEXT
 import bypasser
 from ddl import ddllist, direct_link_generator
 
+FORCE_SUB_CHANNEL = "@HyperX_Updates"
 
+@Client.on_message(filters.private)
+def force_subscribe(client, message):
+    if FORCE_SUB_CHANNEL:
+        try:
+            client.get_chat_member(FORCE_SUB_CHANNEL, message.from_user.id)
+        except pyrogram.errors.UserNotParticipant:
+            client.send_message(
+                message.chat.id,
+                f"Hey there! To use this bot, you need to join @{FORCE_SUB_CHANNEL} first.",
+            )
+            return
+    # Continue with the usual processing
+    receive(client, message)
+    
 # bot
 with open('config.json', 'r') as f: DATA = load(f)
 def getenv(var): return environ.get(var) or DATA.get(var, None)
@@ -130,5 +145,5 @@ def docfile(client: pyrogram.client.Client, message: pyrogram.types.messages_and
 
 
 # server loop
-print("Bot Starting")
+print("BOT STARTED")
 app.run()
