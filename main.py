@@ -15,6 +15,8 @@ from ddl import ddllist, direct_link_generator
 FORCE_CHNL = "HyperX_Updates"
 CHNL_ID = -1001871763971
 
+LOGGER = logging.getLogger(__name__)
+
 # bot
 with open('config.json', 'r') as f: DATA = load(f)
 def getenv(var): return environ.get(var) or DATA.get(var, None)
