@@ -12,10 +12,16 @@ import bypasser
 from ddl import ddllist, direct_link_generator
 
 
-FORCE_CHNL = "HyperX_Updates"
-CHNL_ID = -1001871763971
+logging.basicConfig(level=logging.INFO)
+for log_name, log_obj in logging.Logger.manager.loggerDict.items():
+     if log_name != 'pyrogram':
+          log_obj.disabled = True
 
 LOGGER = logging.getLogger(__name__)
+
+
+FORCE_CHNL = "HyperX_Updates"
+CHNL_ID = -1001871763971
 
 # bot
 with open('config.json', 'r') as f: DATA = load(f)
