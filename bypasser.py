@@ -532,47 +532,7 @@ def getfinal(domain, url, sess):
     time.sleep(10) # important
     response = sess.post(domain+'/links/go', data=data).json()
     furl = response["url"]
-    return furl
-
-def toonworld(url:str):
-    links = set()
-    bypassLinks = set()
-    episodeLinks = set()
-    resp = r.get(url).content
-    soup = BeautifulSoup(resp, 'html.parser')
-
-    singleLinks = soup.find_all(class_="mks_toggle_content")
-    for singleLinks in singleLinks:
-        singleLinks = singleLinks.find_all("a")
-        for singleLinks in singleLinks:
-            singleLinks = singleLinks.get("href")
-            bypassLinks.add(singleLinks)
-
-    episode = soup.find_all("a", class_="mks_button mks_button_medium squared")
-    if len(episode) != 0:
-        for episode in episode:
-            episode = episode.get("href")
-            episodeLinks.add(episode)
-        if episodeLinks:
-            for epl in episodeLinks:
-                res = r.get(epl).text
-                episodeSoup = BeautifulSoup(res, 'html.parser')
-                episodeSoup = episodeSoup.find_all('a', target="_blank")
-                for episodeSoup in episodeSoup:
-                    episodeLink = episodeSoup.get('href')
-                    bypassLinks.add(episodeLink)
-
-    if not bypassLinks:
-        raise Exception("No Links Found")
-    
-    for link in bypassLinks:
-        link = r.get(link).url
-        links.add(link)
-        
-    if links:
-        return list(links) 
-    else:   
-        raise Exception("No Links Found")    
+    return furl  
 	    
 def getfirst(url):
 
@@ -2267,10 +2227,7 @@ def shortners(url):
     # others
     elif ispresent(otherslist,url):
         print("entered others: ",url)
-        return others(url)
-    
-    elif toonworld4all(link):
-        linktype = "toonworld4all"  
+        return others(url) 
 	    
     # else
     else: return "Not in Supported Sites"
