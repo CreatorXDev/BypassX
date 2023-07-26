@@ -11,13 +11,11 @@ import bypasser
 from ddl import ddllist, direct_link_generator
 
 
-AUTHORIZED_CHATS = [-1001937487093, -918773603]
+FORCE_CHNL = "HyperX_Updates"
+CHNL_ID = -1001871763971
 
 # bot
-with open('config.json', 'r') as f:
-    DATA = load(f)
-
-
+with open('config.json', 'r') as f: DATA = load(f)
 def getenv(var): return environ.get(var) or DATA.get(var, None)
 
 bot_token = getenv("TOKEN")
@@ -26,10 +24,6 @@ api_id = getenv("ID")
 app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token)  
 
 
-# Check if the chat is authorized
-def is_authorized_chat(chat_id):
-    return chat_id in AUTHORIZED_CHATS
-    
 # handle ineex
 def handleIndex(ele,message,msg):
     result = bypasser.scrapeIndex(ele)
@@ -90,29 +84,46 @@ def loopthread(message,otherss=False):
 
 
 # start command
-@app.on_message(filters.command(["start"]))
-def send_start(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    app.send_message(message.chat.id, f"__👋 Hi **{message.from_user.mention}**, i am Link Bypasser Bot, just send me any supported links and i will you get you results.\nCheckout /help to Read More__",
-    reply_markup=InlineKeyboardMarkup([
-        [ InlineKeyboardButton("🌐 Source Code", url="https://github.com/bipinkrish/Link-Bypasser-Bot")],
-        [ InlineKeyboardButton("Replit", url="https://replit.com/@bipinkrish/Link-Bypasser#app.py") ]]), 
-        reply_to_message_id=message.id)
+@bot.on_message(filters.command('start') & filters.private)
+async def start(bot, message):
+    if FORCE_CHNL:
+        try:
+            user = await bot.get_chat_member(FORCE_CHNL, message.from_user.id)
+            if user.status == "kicked out":
+                await message.reply_text(f"You Are Banned\nContact @sai0909 To get Unbanned")
+                return
+        except UserNotParticipant:
+            await message.reply_text(
+                text = f"You Haven't Joined My Updates Channel @{FORCE_CHNL}\n\n Join It Using Below Link",
+                reply_markup = InlineKeyboardMarkup([[
+                    InlineKeyboardButton("UPDATES CHANNEL", url=f"t.me/{FORCE_CHNL}")
+                ]])
+            )
+            return
+    LOGGER.info(f"{message.chat.first_name} Just Started me")
+    text = f"Hey {message.chat.first_name}\n\n I'm A public link generator bot.\n\nFollowing are the supported sites\n\n<b>1.GDTOT\n2.Appdrive/Driveapp\n3.HubDrive\n4.KatDrive\n5.kolop"
+    BUTTONS = [
+        [
+            InlineKeyboardButton("UPDATES CHANNEL", url=f"t.me/{FORCE_CHNL}"),
+            InlineKeyboardButton("CONTACT OWNER", url=f"t.me/{conatact}")
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(BUTTONS)
+    await message.reply((text), reply_markup=reply_markup)
 
 
 # help command
 @app.on_message(filters.command(["help"]))
 def send_help(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    if not is_authorized_chat(message.chat.id):
-        return
     app.send_message(message.chat.id, HELP_TEXT, reply_to_message_id=message.id, disable_web_page_preview=True)
+
 
 # links
 @app.on_message(filters.text)
 def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    if not is_authorized_chat(message.chat.id):
-        return
-    bypass = Thread(target=lambda: loopthread(message), daemon=True)
+    bypass = Thread(target=lambda:loopthread(message),daemon=True)
     bypass.start()
+
 
 # doc thread
 def docthread(message):
@@ -126,21 +137,19 @@ def docthread(message):
 
 
 # files
-@app.on_message([filters.document, filters.photo, filters.video])
+@app.on_message([filters.document,filters.photo,filters.video])
 def docfile(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    if not is_authorized_chat(message.chat.id):
-        return
-
+    
     try:
         if message.document.file_name.endswith("dlc"):
-            bypass = Thread(target=lambda: docthread(message), daemon=True)
+            bypass = Thread(target=lambda:docthread(message),daemon=True)
             bypass.start()
             return
-    except:
-        pass
+    except: pass
 
-    bypass = Thread(target=lambda: loopthread(message, True), daemon=True)
+    bypass = Thread(target=lambda:loopthread(message,True),daemon=True)
     bypass.start()
+
 
 # server loop
 print("Bot Starting")
