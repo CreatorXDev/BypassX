@@ -9,22 +9,6 @@ from re import search
 from texts import HELP_TEXT
 import bypasser
 from ddl import ddllist, direct_link_generator
-
-FORCE_SUB_CHANNEL = "@HyperX_Updates"
-
-@Client.on_message(filters.private)
-def force_subscribe(client, message):
-    if FORCE_SUB_CHANNEL:
-        try:
-            client.get_chat_member(FORCE_SUB_CHANNEL, message.from_user.id)
-        except pyrogram.errors.UserNotParticipant:
-            client.send_message(
-                message.chat.id,
-                f"Hey there! To use this bot, you need to join @{FORCE_SUB_CHANNEL} first.",
-            )
-            return
-    # Continue with the usual processing
-    receive(client, message)
     
 # bot
 with open('config.json', 'r') as f: DATA = load(f)
@@ -98,12 +82,27 @@ def loopthread(message,otherss=False):
 # start command
 @app.on_message(filters.command(["start"]))
 def send_start(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    app.send_message(message.chat.id, f"__👋 Hi **{message.from_user.mention}**, i am Link Bypasser Bot, just send me any supported links and i will you get you results.\nCheckout /help to Read More__",
-    reply_markup=InlineKeyboardMarkup([
-        [ InlineKeyboardButton("🌐 Source Code", url="https://github.com/bipinkrish/Link-Bypasser-Bot")],
-        [ InlineKeyboardButton("Replit", url="https://replit.com/@bipinkrish/Link-Bypasser#app.py") ]]), 
-        reply_to_message_id=message.id)
+    app.send_message(
+        message.chat.id,
+        f"__👋 Hi **{message.from_user.mention}**, I am Link Bypasser Bot, just send me any supported links and I will get you the results.\nCheckout /help to Read More__",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🌐 Source Code", url="https://github.com/bipinkrish/Link-Bypasser-Bot")],
+            [InlineKeyboardButton("Replit", url="https://replit.com/@bipinkrish/Link-Bypasser#app.py")]
+        ]),
+        reply_to_message_id=message.message_id
+    )
 
+# force sub command
+@app.on_message(filters.command(["forcesub"]))
+def force_sub(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    app.send_message(
+        message.chat.id,
+        "To use this bot, you must first subscribe to our channel.\nPlease click the link below to join:\n\n[HyperX Updates](https://t.me/HyperX_Updates)",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔥 Join Channel 🔥", url="https://t.me/HyperX_Updates")]
+        ]),
+        reply_to_message_id=message.message_id
+    )
 
 # help command
 @app.on_message(filters.command(["help"]))
