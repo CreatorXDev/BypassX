@@ -1,3 +1,4 @@
+import logging
 import pyrogram
 from pyrogram import Client,filters
 from pyrogram.errors import UserNotParticipant, FloodWait
@@ -6,6 +7,7 @@ from os import environ, remove
 from threading import Thread
 from json import load
 from re import search
+from bs4 import BeautifulSoup
 
 from texts import HELP_TEXT
 import bypasser
