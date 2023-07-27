@@ -9,7 +9,6 @@ from lxml import etree
 import hashlib
 import json
 from asyncio import sleep as asleep
-from time import sleep
 import ddl
 from cfscrape import create_scraper
 from json import load
@@ -450,7 +449,24 @@ def scrappers(link):
             title = soupt.select('meta[property^="og:description"]')
             no += 1
             gd_txt += f"{no}. {(title[0]['content']).replace('Download ' , '')}\n{glink}\n\n"
-        return gd_txt    
+        return gd_txt
+    
+    elif "toonworld4all" in link:
+        gd_txt, no = "", 0
+        r = requests.get(link)
+        soup = BeautifulSoup(r.text, "html.parser")
+        links = soup.select('a[href*="redirect/main.php?"]')
+        for a in links:
+            down = requests.get(a['href'], stream=True, allow_redirects=False)
+            link = down.headers["location"]
+            glink = rocklinks(link)
+            if glink and "gdtot" in glink:
+                t = requests.get(glink)
+                soupt = BeautifulSoup(t.text, "html.parser")
+                title = soupt.select('meta[property^="og:description"]')
+                no += 1
+                gd_txt += f"{no}. {(title[0]['content']).replace('Download ' , '')}\n{glink}\n\n"
+        return gd_txt
     
     elif "animeremux" in link:
         gd_txt, no = "", 0
@@ -477,46 +493,7 @@ def scrappers(link):
             links.append(hy['href'])
         return links
 
-def toonworld(url:str):
-    links = set()
-    bypassLinks = set()
-    episodeLinks = set()
-    resp = r.get(url).content
-    soup = BeautifulSoup(resp, 'html.parser')
 
-    singleLinks = soup.find_all(class_="mks_toggle_content")
-    for singleLinks in singleLinks:
-        singleLinks = singleLinks.find_all("a")
-        for singleLinks in singleLinks:
-            singleLinks = singleLinks.get("href")
-            bypassLinks.add(singleLinks)
-
-    episode = soup.find_all("a", class_="mks_button mks_button_medium squared")
-    if len(episode) != 0:
-        for episode in episode:
-            episode = episode.get("href")
-            episodeLinks.add(episode)
-        if episodeLinks:
-            for epl in episodeLinks:
-                res = r.get(epl).text
-                episodeSoup = BeautifulSoup(res, 'html.parser')
-                episodeSoup = episodeSoup.find_all('a', target="_blank")
-                for episodeSoup in episodeSoup:
-                    episodeLink = episodeSoup.get('href')
-                    bypassLinks.add(episodeLink)
-
-    if not bypassLinks:
-        raise Exception("No Links Found")
-    
-    for link in bypassLinks:
-        link = r.get(link).url
-        links.add(link)
-        
-    if links:
-        return list(links) 
-    else:   
-        raise Exception("No Links Found")   
-	    
 ###################################################
 # script links
 
@@ -1295,19 +1272,22 @@ def adfly(url):
 # gplinks
 
 def gplinks(url: str):
-    url = url[:-1] if url[-1] == '/' else url
+    client = cloudscraper.create_scraper(allow_brotli=False)
+    token = url.split("/")[-1]
     domain ="https://gplinks.co/"
-    client = requests.Session()
+    referer = "https://mynewsmedia.co/"
     vid = client.get(url, allow_redirects= False).headers["Location"].split("=")[-1]
     url = f"{url}/?{vid}"
     response = client.get(url, allow_redirects=False)
     soup = BeautifulSoup(response.content, "html.parser")
     inputs = soup.find(id="go-link").find_all(name="input")
     data = { input.get('name'): input.get('value') for input in inputs }
-    time.sleep(5)
+    time.sleep(10)
     headers={"x-requested-with": "XMLHttpRequest"}
-    return client.post(domain+"links/go", data=data, headers=headers).json()["url"]
-	
+    bypassed_url = client.post(domain+"links/go", data=data, headers=headers).json()["url"]
+    try: return bypassed_url
+    except: return 'Something went wrong :('
+
 
 ######################################################################################################
 # droplink
@@ -1981,11 +1961,6 @@ def ispresent(inlist,url):
     return False
 
 
-def toonworld4all(url:str):
-    if ("php" or "redirect") not in url:
-        url = re.match(r'https?://.*toonworld4all\.me/\S+', url)
-        return bool(url)  	
-	
 # shortners
 def shortners(url):
     
@@ -2242,10 +2217,10 @@ def shortners(url):
         
     # htpmovies sharespark cinevood
     elif "https://htpmovies." in url or 'https://sharespark.me/' in url or "https://cinevood." in url or "https://atishmkv." in url \
-        or "https://teluguflix" in url or 'https://taemovies' in url or "https://animeremux" in url:
+        or "https://teluguflix" in url or 'https://taemovies' in url or "https://toonworld4all" in url or "https://animeremux" in url:
         print("entered htpmovies sharespark cinevood atishmkv: ",url)
         return scrappers(url)
-	    
+
     # gdrive look alike
     elif ispresent(gdlist,url):
         print("entered gdrive look alike: ",url)
@@ -2256,9 +2231,6 @@ def shortners(url):
         print("entered others: ",url)
         return others(url)
 
-    elif linktype = None
-    if toonworld4all(link):
-        linktype = "toonworld4all" 	
     # else
     else: return "Not in Supported Sites"
     
