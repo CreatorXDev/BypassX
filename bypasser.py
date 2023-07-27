@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 from lxml import etree
 import hashlib
 import json
+from time import sleep
 from asyncio import sleep as asleep
 import ddl
 from cfscrape import create_scraper
