@@ -1985,7 +1985,12 @@ def toonworld4all(url:str):
     if ("php" or "redirect") not in url:
         url = re.match(r'https?://.*toonworld4all\.me/\S+', url)
         return bool(url)
-	    
+
+def scrap_link(link:str):
+    linktype = None
+    elif toonworld4all(link):
+        linktype = "toonworld4all"   	
+	
 # shortners
 def shortners(url):
     
@@ -2245,9 +2250,6 @@ def shortners(url):
         or "https://teluguflix" in url or 'https://taemovies' in url or "https://animeremux" in url:
         print("entered htpmovies sharespark cinevood atishmkv: ",url)
         return scrappers(url)
-
-    elif toonworld4all(link):
-        linktype = "toonworld4all" 
 	    
     # gdrive look alike
     elif ispresent(gdlist,url):
