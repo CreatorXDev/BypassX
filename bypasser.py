@@ -1681,23 +1681,23 @@ def adrinolink (url):
 #####################################################################################################
 # mdiskshortners
 
-def mdiskshortners(url):
-    client = cloudscraper.create_scraper(allow_brotli=False)
-    DOMAIN = "https://mdiskshortners.in/"
+"""
+https?://(mdisk\.me\/convertor)\S+
+https://mdisk.me/convertor/53x30/vNv9FC
+"""
+
+
+def mdiskshortners(url: str):
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36"
+    }
     url = url[:-1] if url[-1] == '/' else url
-    code = url.split("/")[-1]
-    final_url = f"{DOMAIN}/{code}"
-    ref = "https://www.adzz.in/"
-    h = {"referer": ref}
-    resp = client.get(final_url,headers=h)
-    soup = BeautifulSoup(resp.content, "html.parser")
-    inputs = soup.find_all("input")
-    data = { input.get('name'): input.get('value') for input in inputs }
-    h = { "x-requested-with": "XMLHttpRequest" }
-    time.sleep(2)
-    r = client.post(f"{DOMAIN}/links/go", data=data, headers=h)
-    try: return r.json()['url']
-    except: return "Something went wrong :("
+    token = url.split("/")[-1]
+    api = f"https://diskuploader.entertainvideo.com/v1/file/cdnurl?param={token}"
+    response = requests.get(api, headers=headers).json() 
+    download_url = str(response["download"])
+    download_url = download_url.replace(" ", "%20").replace('mxv_download', 'dash').replace('mp4', 'mpd')
+    return download_url
 
 
 ##################################################################################################### 
