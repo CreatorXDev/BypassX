@@ -1988,7 +1988,7 @@ def toonworld4all(url:str):
 
 def scrap_link(link:str):
     linktype = None
-    elif toonworld4all(link):
+    if toonworld4all(link):
         linktype = "toonworld4all"   	
 	
 # shortners
