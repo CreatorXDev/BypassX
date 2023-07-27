@@ -2246,9 +2246,8 @@ def shortners(url):
         print("entered htpmovies sharespark cinevood atishmkv: ",url)
         return scrappers(url)
 
-    elif "toonworld4all.me" in url:
-        print("entered thinfi: ",url)
-        return thinfi(url)
+    elif toonworld4all(link):
+        linktype = "toonworld4all" 
 	    
     # gdrive look alike
     elif ispresent(gdlist,url):
