@@ -15,15 +15,11 @@ from ddl import ddllist, direct_link_generator
 with open('config.json', 'r') as f: DATA = load(f)
 def getenv(var): return environ.get(var) or DATA.get(var, None)
 
-bot_token = getenv("TOKEN")
-api_hash = getenv("HASH") 
-api_id = getenv("ID")
-app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token)  
+api_id = 1600998  # Replace with your API ID (integer)
+api_hash = 'c29b36c915c7da5ba3c30dfadc51bd73'  # Replace with your API Hash (string)
+bot_token = '6383357536:AAG747_cpWJQsfu_X8gsmes4ADU7w84sxOo'  # Replace with your Bot API Token (string)
 
-
-TOKEN = '6383357536:AAG747_cpWJQsfu_X8gsmes4ADU7w84sxOo'
-HASH = 'c29b36c915c7da5ba3c30dfadc51bd73'
-ID = '1600998'
+app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
 # handle ineex
 def handleIndex(ele,message,msg):
@@ -134,5 +130,6 @@ def docfile(client: pyrogram.client.Client, message: pyrogram.types.messages_and
 
 
 # server loop
-print("Bot Starting")
-app.run()
+print("Bot STARTED")
+if __name__ == "__main__":
+    app.run()
