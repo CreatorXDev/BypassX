@@ -17,7 +17,7 @@ def getenv(var): return environ.get(var) or DATA.get(var, None)
 
 api_id = 1600998  # Replace with your API ID (integer)
 api_hash = 'c29b36c915c7da5ba3c30dfadc51bd73'  # Replace with your API Hash (string)
-bot_token = '6383357536:AAG747_cpWJQsfu_X8gsmes4ADU7w84sxOo'  # Replace with your Bot API Token (string)
+bot_token = '6164457879:AAH7FxFX5F9hIAruioBtWN3GY610ZR2VuCk'  # Replace with your Bot API Token (string)
 
 app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
