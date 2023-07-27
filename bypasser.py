@@ -1984,12 +1984,7 @@ def ispresent(inlist,url):
 def toonworld4all(url:str):
     if ("php" or "redirect") not in url:
         url = re.match(r'https?://.*toonworld4all\.me/\S+', url)
-        return bool(url)
-
-def scrap_link(link:str):
-    linktype = None
-    if toonworld4all(link):
-        linktype = "toonworld4all"   	
+        return bool(url)  	
 	
 # shortners
 def shortners(url):
@@ -2261,6 +2256,9 @@ def shortners(url):
         print("entered others: ",url)
         return others(url)
 
+    elif linktype = None
+    if toonworld4all(link):
+        linktype = "toonworld4all" 	
     # else
     else: return "Not in Supported Sites"
     
