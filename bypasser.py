@@ -1981,6 +1981,11 @@ def ispresent(inlist,url):
     return False
 
 
+def toonworld4all(url:str):
+    if ("php" or "redirect") not in url:
+        url = re.match(r'https?://.*toonworld4all\.me/\S+', url)
+        return bool(url)
+	    
 # shortners
 def shortners(url):
     
