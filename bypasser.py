@@ -9,6 +9,7 @@ from lxml import etree
 import hashlib
 import json
 from asyncio import sleep as asleep
+from time import sleep
 import ddl
 from cfscrape import create_scraper
 from json import load
@@ -210,36 +211,20 @@ def psa_bypasser(psa_url):
 ##################################################################################################################
 # rocklinks
 
-def rocklinks(url):
-    client = cloudscraper.create_scraper(allow_brotli=False)
-    if 'rocklinks.net' in url:
-        DOMAIN = "https://blog.disheye.com"
-    else:
-        DOMAIN = "https://rocklinks.net"
-
-    url = url[:-1] if url[-1] == '/' else url
-
-    code = url.split("/")[-1]
-    if 'rocklinks.net' in url:
-        final_url = f"{DOMAIN}/{code}?quelle=" 
-    else:
-        final_url = f"{DOMAIN}/{code}"
-
-    resp = client.get(final_url)
-    soup = BeautifulSoup(resp.content, "html.parser")
-    
-    try: inputs = soup.find(id="go-link").find_all(name="input")
-    except: return "Incorrect Link"
-    
-    data = { input.get('name'): input.get('value') for input in inputs }
-
-    h = { "x-requested-with": "XMLHttpRequest" }
-    
-    time.sleep(10)
-    r = client.post(f"{DOMAIN}/links/go", data=data, headers=h)
-    try:
-        return r.json()['url']
-    except: return "Something went wrong :("
+def rocklinks(url: str):
+   with requests.Session() as client:
+      if "toonworld4all" in url:
+         url = client.get(url).url
+      code = url.split("/")[-1]
+      DOMAIN = 'https://share.techymedies.com/'
+      resp = client.get(DOMAIN+code, headers={"referer": 'https://disheye.com/'})
+      soup = BeautifulSoup(resp.content, "html.parser")
+      inputs = soup.find(id="go-link").find_all(name="input")
+      data = { input.get('name'): input.get('value') for input in inputs }
+      h = { "x-requested-with": "XMLHttpRequest" }
+      sleep(10)
+      r = client.post(f"{DOMAIN}links/go", data=data, headers=h)
+      return r.json()['url']
 
 
 ################################################
@@ -465,24 +450,7 @@ def scrappers(link):
             title = soupt.select('meta[property^="og:description"]')
             no += 1
             gd_txt += f"{no}. {(title[0]['content']).replace('Download ' , '')}\n{glink}\n\n"
-        return gd_txt
-    
-    elif "toonworld4all" in link:
-        gd_txt, no = "", 0
-        r = requests.get(link)
-        soup = BeautifulSoup(r.text, "html.parser")
-        links = soup.select('a[href*="redirect/main.php?"]')
-        for a in links:
-            down = requests.get(a['href'], stream=True, allow_redirects=False)
-            link = down.headers["location"]
-            glink = rocklinks(link)
-            if glink and "gdtot" in glink:
-                t = requests.get(glink)
-                soupt = BeautifulSoup(t.text, "html.parser")
-                title = soupt.select('meta[property^="og:description"]')
-                no += 1
-                gd_txt += f"{no}. {(title[0]['content']).replace('Download ' , '')}\n{glink}\n\n"
-        return gd_txt
+        return gd_txt    
     
     elif "animeremux" in link:
         gd_txt, no = "", 0
@@ -509,7 +477,46 @@ def scrappers(link):
             links.append(hy['href'])
         return links
 
+def toonworld(url:str):
+    links = set()
+    bypassLinks = set()
+    episodeLinks = set()
+    resp = r.get(url).content
+    soup = BeautifulSoup(resp, 'html.parser')
 
+    singleLinks = soup.find_all(class_="mks_toggle_content")
+    for singleLinks in singleLinks:
+        singleLinks = singleLinks.find_all("a")
+        for singleLinks in singleLinks:
+            singleLinks = singleLinks.get("href")
+            bypassLinks.add(singleLinks)
+
+    episode = soup.find_all("a", class_="mks_button mks_button_medium squared")
+    if len(episode) != 0:
+        for episode in episode:
+            episode = episode.get("href")
+            episodeLinks.add(episode)
+        if episodeLinks:
+            for epl in episodeLinks:
+                res = r.get(epl).text
+                episodeSoup = BeautifulSoup(res, 'html.parser')
+                episodeSoup = episodeSoup.find_all('a', target="_blank")
+                for episodeSoup in episodeSoup:
+                    episodeLink = episodeSoup.get('href')
+                    bypassLinks.add(episodeLink)
+
+    if not bypassLinks:
+        raise Exception("No Links Found")
+    
+    for link in bypassLinks:
+        link = r.get(link).url
+        links.add(link)
+        
+    if links:
+        return list(links) 
+    else:   
+        raise Exception("No Links Found")   
+	    
 ###################################################
 # script links
 
@@ -2230,10 +2237,14 @@ def shortners(url):
         
     # htpmovies sharespark cinevood
     elif "https://htpmovies." in url or 'https://sharespark.me/' in url or "https://cinevood." in url or "https://atishmkv." in url \
-        or "https://teluguflix" in url or 'https://taemovies' in url or "https://toonworld4all" in url or "https://animeremux" in url:
+        or "https://teluguflix" in url or 'https://taemovies' in url or "https://animeremux" in url:
         print("entered htpmovies sharespark cinevood atishmkv: ",url)
         return scrappers(url)
 
+    elif "toonworld4all.me" in url:
+        print("entered thinfi: ",url)
+        return thinfi(url)
+	    
     # gdrive look alike
     elif ispresent(gdlist,url):
         print("entered gdrive look alike: ",url)
