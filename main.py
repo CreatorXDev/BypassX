@@ -13,8 +13,8 @@ from ddl import ddllist, direct_link_generator
 from time import time
 
 
-OWNER_USERNAME = sai0909
-UPDATES_CHANNEL = HyperX_Updates
+OWNER_USERNAME = "sai0909"
+UPDATES_CHANNEL = "HyperX_Updates"
 # bot
 with open('config.json', 'r') as f: DATA = load(f)
 def getenv(var): return environ.get(var) or DATA.get(var, None)
