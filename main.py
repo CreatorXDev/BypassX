@@ -105,7 +105,7 @@ async def send_start(client: Client, message: types.Message):
     if UPDATES_CHANNEL != "None":
         try:
             user = await app.get_chat_member(UPDATES_CHANNEL, message.chat.id)
-            if user.status == types.ChatMemberStatus.BANNED:
+            if user.status == types.ChatMember.BANNED:
                 await app.send_message(
                     chat_id=message.chat.id,
                     text=f"__Sorry, you are banned. Contact My [ Owner ](https://telegram.me/{OWNER_USERNAME})__",
