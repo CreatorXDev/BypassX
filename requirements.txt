@@ -3,6 +3,7 @@ cloudscraper
 bs4 
 python-dotenv
 pyrogram
+python-telegram-bot
 tgcrypto
 lxml
 cfscrape
