@@ -105,7 +105,7 @@ async def send_start(client: Client, message: types.Message):
     if UPDATES_CHANNEL != "None":
         try:
             user = await app.get_chat_member(UPDATES_CHANNEL, message.chat.id)
-            if user.status == types.ChatMember.BANNED:
+            if user.status == "kicked out":
                 await app.send_message(
                     chat_id=message.chat.id,
                     text=f"__Sorry, you are banned. Contact My [ Owner ](https://telegram.me/{OWNER_USERNAME})__",
@@ -122,10 +122,9 @@ async def send_start(client: Client, message: types.Message):
                             InlineKeyboardButton("🔓 Join Now 🔓", url=f"https://t.me/{UPDATES_CHANNEL}")
                         ]
                     ]
-                )
+                ),
             )
             return
-
     await app.send_message(message.chat.id, f"__👋 Hi **{message.from_user.mention}**, I am Link Bypasser Bot, just send me any supported links and I will get you the results.\nCheckout /help to Read More__",
                            reply_markup=InlineKeyboardMarkup([
                                [InlineKeyboardButton("🌐 Source Code", url="https://github.com/bipinkrish/Link-Bypasser-Bot")],
