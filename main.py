@@ -135,7 +135,7 @@ async def send_start(client: Client, message: types.Message):
 
 # help command
 @app.on_message(pyrogram.filters.command(["help"]))
-async def send_help(client: pyrogram.Client, message: pyrogram.Message):
+async def send_help(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     if UPDATES_CHANNEL != "None":
         try:
             user = await app.get_chat_member(UPDATES_CHANNEL, message.chat.id)
@@ -164,7 +164,7 @@ async def send_help(client: pyrogram.Client, message: pyrogram.Message):
 
 # links
 @app.on_message(filters.text)
-async def receive(client: pyrogram.client.Client, message: Message):
+async def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     if UPDATES_CHANNEL != "None":
         try:
             user = await app.get_chat_member(UPDATES_CHANNEL, message.chat.id)
