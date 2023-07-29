@@ -13,8 +13,6 @@ from ddl import ddllist, direct_link_generator
 from time import time
 
 
-OWNER_USERNAME = "sai0909"
-UPDATES_CHANNEL = "HyperX_Updates"
 # bot
 with open('config.json', 'r') as f: DATA = load(f)
 def getenv(var): return environ.get(var) or DATA.get(var, None)
@@ -24,6 +22,9 @@ api_hash = 'c29b36c915c7da5ba3c30dfadc51bd73'  # Replace with your API Hash (str
 bot_token = '6164457879:AAH7FxFX5F9hIAruioBtWN3GY610ZR2VuCk'  # Replace with your Bot API Token (string)
 
 app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
+
+OWNER_USERNAME = "sai0909"
+UPDATES_CHANNEL = "HyperX_Updates"
 
 # handle ineex
 def handleIndex(ele,message,msg):
@@ -127,8 +128,8 @@ async def send_start(client: Client, message: types.Message):
             return
     await app.send_message(message.chat.id, f"__👋 Hi **{message.from_user.mention}**, I am Link Bypasser Bot, just send me any supported links and I will get you the results.\nCheckout /help to Read More__",
                            reply_markup=InlineKeyboardMarkup([
-                               [InlineKeyboardButton("🌐 Source Code", url="https://github.com/bipinkrish/Link-Bypasser-Bot")],
-                               [InlineKeyboardButton("Replit", url="https://replit.com/@bipinkrish/Link-Bypasser#app.py")]
+                               [InlineKeyboardButton("OWNER", url="https://t.me/sai0909")],
+                               [InlineKeyboardButton("KINGS MIRROR", url="https://t.me/KINGS_MIRROR")]
                            ]),
                            reply_to_message_id=message.id)
 
