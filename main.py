@@ -107,7 +107,7 @@ def send_start(client: pyrogram.client.Client, message: pyrogram.types.messages_
                     reply_markup=InlineKeyboardMarkup(
                         [
                             [
-                                InlineKeyboardButton("🔓 Join Now 🔓", url=f"https://t.me/{UPDATES_CHANNEL}")
+                                InlineKeyboardButton("🔓 Join Now 🔓", url=f"https://t.me/HyperX_Updates")
                             ]
                         ]
                     ),
