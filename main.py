@@ -125,13 +125,6 @@ async def send_start(client: Client, message: types.Message):
                 )
             )
             return
-        except Exception:
-            await app.send_message(
-                chat_id=message.chat.id,
-                text=f"<i>Something went wrong</i> <b> <a href='https://telegram.me/{OWNER_USERNAME}'>CLICK HERE FOR SUPPORT </a></b>",
-                disable_web_page_preview=True
-            )
-            return
 
     await app.send_message(message.chat.id, f"__👋 Hi **{message.from_user.mention}**, I am Link Bypasser Bot, just send me any supported links and I will get you the results.\nCheckout /help to Read More__",
                            reply_markup=InlineKeyboardMarkup([
