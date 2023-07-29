@@ -1,3 +1,6 @@
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
+
 gdrivetext = """__- appdrive \n\
 - driveapp \n\
 - drivehub \n\
@@ -116,6 +119,44 @@ __"""
 
 HELP_TEXT = f'**--Just Send me any Supported Links From Below Mentioned Sites--** \n\n\
 **List of Sites for DDL : ** \n\n{ddltext} \n\
-**List of Sites for Shortners : ** \n\n{shortnertext} \n\
+**List of Sites for Shorteners : ** \n\n{shortnertext} \n\
 **List of Sites for GDrive Look-ALike : ** \n\n{gdrivetext} \n\
 **Other Supported Sites : ** \n\n{otherstext}'
+
+
+def start(update, context):
+    keyboard = [
+        [InlineKeyboardButton("DDL Sites", callback_data='ddl')],
+        [InlineKeyboardButton("Shorteners", callback_data='shorteners')],
+        [InlineKeyboardButton("GDrive Look-ALike", callback_data='gdrive')],
+        [InlineKeyboardButton("Other Sites", callback_data='others')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text(HELP_TEXT, reply_markup=reply_markup)
+
+
+def menu_selection(update, context):
+    query = update.callback_query
+    query.answer()
+    if query.data == 'ddl':
+        query.edit_message_text(ddltext)
+    elif query.data == 'shorteners':
+        query.edit_message_text(shortnertext)
+    elif query.data == 'gdrive':
+        query.edit_message_text(gdrivetext)
+    elif query.data == 'others':
+        query.edit_message_text(otherstext)
+
+def main():
+    updater = Updater("6164457879:AAH7FxFX5F9hIAruioBtWN3GY610ZR2VuCk", use_context=True)
+    dp = updater.dispatcher
+
+    dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(CallbackQueryHandler(menu_selection))
+
+    updater.start_polling()
+    updater.idle()
+
+
+if __name__ == '__main__':
+    main()
