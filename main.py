@@ -105,7 +105,7 @@ async def send_start(client: Client, message: types.Message):
     if UPDATES_CHANNEL != "None":
         try:
             user = await app.get_chat_member(UPDATES_CHANNEL, message.chat.id)
-            if user.status == "kicked out":
+            if user.status == "kicked":
                 await app.send_message(
                     chat_id=message.chat.id,
                     text=f"__Sorry, you are banned. Contact My [ Owner ](https://telegram.me/{OWNER_USERNAME})__",
@@ -134,12 +134,12 @@ async def send_start(client: Client, message: types.Message):
 
 
 # help command
-@app.on_message(filters.command(["help"]))
-def send_help(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+@app.on_message(pyrogram.filters.command(["help"]))
+async def send_help(client: pyrogram.Client, message: pyrogram.Message):
     if UPDATES_CHANNEL != "None":
         try:
             user = await app.get_chat_member(UPDATES_CHANNEL, message.chat.id)
-            if user.status == "kicked out":
+            if user.status == "kicked":
                 await app.send_message(
                     chat_id=message.chat.id,
                     text=f"__Sorry, you are banned. Contact My [ Owner ](https://telegram.me/{OWNER_USERNAME})__",
@@ -159,23 +159,23 @@ def send_help(client: pyrogram.client.Client, message: pyrogram.types.messages_a
                 ),
             )
             return
-    app.send_message(message.chat.id, HELP_TEXT, reply_to_message_id=message.id, disable_web_page_preview=True)
+    await app.send_message(message.chat.id, HELP_TEXT, reply_to_message_id=message_id, disable_web_page_preview=True)
 
 
 # links
 @app.on_message(filters.text)
-def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+async def receive(client: pyrogram.client.Client, message: Message):
     if UPDATES_CHANNEL != "None":
         try:
             user = await app.get_chat_member(UPDATES_CHANNEL, message.chat.id)
-            if user.status == "kicked out":
+            if user.status == "kicked":
                 await app.send_message(
                     chat_id=message.chat.id,
                     text=f"__Sorry, you are banned. Contact My [ Owner ](https://telegram.me/{OWNER_USERNAME})__",
                     disable_web_page_preview=True
                 )
                 return
-        except UserNotParticipant:
+        except pyrogram.errors.UserNotParticipant:
             await app.send_message(
                 chat_id=message.chat.id,
                 text="<i>🔐 Join Channel To Use Me 🔐</i>",
@@ -188,7 +188,7 @@ def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and
                 ),
             )
             return
-    bypass = Thread(target=lambda:loopthread(message),daemon=True)
+    bypass = Thread(target=lambda: loopthread(message), daemon=True)
     bypass.start()
 
 
