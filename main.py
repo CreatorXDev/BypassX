@@ -101,43 +101,44 @@ def loopthread(message,otherss=False):
 
 # start command
 @app.on_message(filters.command(["start"]))
-def send_start(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-        if UPDATES_CHANNEL != "None":
-            try:
-                user = await app.get_chat_member(UPDATES_CHANNEL, message.chat.id)
-                if user.status == enums.ChatMemberStatus.BANNED:
-                    await app.send_message(
-                        chat_id=message.chat.id,
-                        text=f"__Sorry, you are banned. Contact My [ Owner ](https://telegram.me/{OWNER_USERNAME})__",
-                        disable_web_page_preview=True
-                    )
-                    return
-            except UserNotParticipant:
-                 await app.send_message(
-                    chat_id=message.chat.id,
-                    text="<i>🔐 Join Channel To Use Me 🔐</i>",
-                    reply_markup=InlineKeyboardMarkup(
-                        [
-                            [
-                                InlineKeyboardButton("🔓 Join Now 🔓", url=f"https://t.me/{UPDATES_CHANNEL}")
-                            ]
-                        ]
-                    ),
-
-                )
-                 return
-            except Exception:
+async def send_start(client: Client, message: types.Message):
+    if UPDATES_CHANNEL != "None":
+        try:
+            user = await app.get_chat_member(UPDATES_CHANNEL, message.chat.id)
+            if user.status == types.ChatMemberStatus.BANNED:
                 await app.send_message(
                     chat_id=message.chat.id,
-                    text=f"<i>Something went wrong</i> <b> <a href='https://telegram.me/{OWNER_USERNAME}'>CLICK HERE FOR SUPPORT </a></b>",
+                    text=f"__Sorry, you are banned. Contact My [ Owner ](https://telegram.me/{OWNER_USERNAME})__",
+                    disable_web_page_preview=True
+                )
+                return
+        except UserNotParticipant:
+            await app.send_message(
+                chat_id=message.chat.id,
+                text="<i>🔐 Join Channel To Use Me 🔐</i>",
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [
+                            InlineKeyboardButton("🔓 Join Now 🔓", url=f"https://t.me/{UPDATES_CHANNEL}")
+                        ]
+                    ]
+                )
+            )
+            return
+        except Exception:
+            await app.send_message(
+                chat_id=message.chat.id,
+                text=f"<i>Something went wrong</i> <b> <a href='https://telegram.me/{OWNER_USERNAME}'>CLICK HERE FOR SUPPORT </a></b>",
+                disable_web_page_preview=True
+            )
+            return
 
-                    disable_web_page_preview=True)
-                return  
-    app.send_message(message.chat.id, f"__👋 Hi **{message.from_user.mention}**, i am Link Bypasser Bot, just send me any supported links and i will you get you results.\nCheckout /help to Read More__",
-    reply_markup=InlineKeyboardMarkup([
-        [ InlineKeyboardButton("🌐 Source Code", url="https://github.com/bipinkrish/Link-Bypasser-Bot")],
-        [ InlineKeyboardButton("Replit", url="https://replit.com/@bipinkrish/Link-Bypasser#app.py") ]]), 
-        reply_to_message_id=message.id)
+    await app.send_message(message.chat.id, f"__👋 Hi **{message.from_user.mention}**, I am Link Bypasser Bot, just send me any supported links and I will get you the results.\nCheckout /help to Read More__",
+                           reply_markup=InlineKeyboardMarkup([
+                               [InlineKeyboardButton("🌐 Source Code", url="https://github.com/bipinkrish/Link-Bypasser-Bot")],
+                               [InlineKeyboardButton("Replit", url="https://replit.com/@bipinkrish/Link-Bypasser#app.py")]
+                           ]),
+                           reply_to_message_id=message.message_id)
 
 
 # help command
