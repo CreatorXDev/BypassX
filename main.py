@@ -1,6 +1,7 @@
 import pyrogram
 from pyrogram import Client,filters
 from pyrogram.types import InlineKeyboardMarkup,InlineKeyboardButton
+from pyrogram.errors import UserNotParticipant
 from os import environ, remove
 from threading import Thread
 from json import load
@@ -9,17 +10,18 @@ from re import search
 from texts import HELP_TEXT
 import bypasser
 from ddl import ddllist, direct_link_generator
+from time import time
 
 
 # bot
 with open('config.json', 'r') as f: DATA = load(f)
 def getenv(var): return environ.get(var) or DATA.get(var, None)
 
-api_id = 1600998  # Replace with your API ID (integer)
-api_hash = 'c29b36c915c7da5ba3c30dfadc51bd73'  # Replace with your API Hash (string)
-bot_token = '6164457879:AAH7FxFX5F9hIAruioBtWN3GY610ZR2VuCk'  # Replace with your Bot API Token (string)
+bot_token = getenv("TOKEN")
+api_hash = getenv("HASH") 
+api_id = getenv("ID")
+app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token)  
 
-app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
 # handle ineex
 def handleIndex(ele,message,msg):
@@ -45,12 +47,13 @@ def loopthread(message,otherss=False):
     if bypasser.ispresent(ddllist,urls[0]):
         msg = app.send_message(message.chat.id, "⚡ __generating...__", reply_to_message_id=message.id)
     else:
-        if urls[0] in "https://olamovies" or urls[0] in "https://psa.pm/":
+        if "https://olamovies" in urls[0] or "https://psa.wf/" in urls[0]:
             msg = app.send_message(message.chat.id, "🔎 __this might take some time...__", reply_to_message_id=message.id)
         else:
             msg = app.send_message(message.chat.id, "🔎 __bypassing...__", reply_to_message_id=message.id)
 
-    link = ""
+    strt = time()
+    links = ""
     for ele in urls:
         if search(r"https?:\/\/(?:[\w.-]+)?\.\w+\/\d+:", ele):
             handleIndex(ele,message,msg)
@@ -62,27 +65,55 @@ def loopthread(message,otherss=False):
             try: temp = bypasser.shortners(ele)
             except Exception as e: temp = "**Error**: " + str(e)
         print("bypassed:",temp)
-        if temp != None: link = link + temp + "\n\n"
-    
+        if temp != None: links = links + temp + "\n"
+    end = time()
+    print("Took " + "{:.2f}".format(end-strt) + "sec")
+
     if otherss:
         try:
-            app.send_photo(message.chat.id, message.photo.file_id, f'__{link}__', reply_to_message_id=message.id)
+            app.send_photo(message.chat.id, message.photo.file_id, f'__{links}__', reply_to_message_id=message.id)
             app.delete_messages(message.chat.id,[msg.id])
             return
         except: pass
 
-    try: app.edit_message_text(message.chat.id, msg.id, f'__{link}__', disable_web_page_preview=True)
-    except:
-        try: app.edit_message_text(message.chat.id, msg.id, "__Failed to Bypass__")
+    try: 
+        final = []
+        tmp = ""
+        for ele in links.split("\n"):
+            tmp += ele + "\n"
+            if len(tmp) > 4000:
+                final.append(tmp)
+                tmp = ""
+        final.append(tmp)
+        app.delete_messages(message.chat.id, msg.id)
+        tmsgid = message.id
+        for ele in final:
+            tmsg = app.send_message(message.chat.id, f'__{ele}__',reply_to_message_id=tmsgid, disable_web_page_preview=True)
+            tmsgid = tmsg.id
+    except Exception as e:
+        print(e)
+        try: app.send_message(message.chat.id, "__Failed to Bypass__", reply_to_message_id=message.id)
         except:
-            try: app.delete_messages(message.chat.id, msg.id)
-            except: pass
-            app.send_message(message.chat.id, "__Failed to Bypass__")
+            app.send_message(message.chat.id, "__Failed to Bypass__", reply_to_message_id=message.id)
 
 
 # start command
 @app.on_message(filters.command(["start"]))
 def send_start(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    except UserNotParticipant:
+                 await app.send_message(
+                    chat_id=message.chat.id,
+                    text="<i>🔐 Join Channel To Use Me 🔐</i>",
+                    reply_markup=InlineKeyboardMarkup(
+                        [
+                            [
+                                InlineKeyboardButton("🔓 Join Now 🔓", url=f"https://t.me/{UPDATES_CHANNEL}")
+                            ]
+                        ]
+                    ),
+
+                )
+                 return
     app.send_message(message.chat.id, f"__👋 Hi **{message.from_user.mention}**, i am Link Bypasser Bot, just send me any supported links and i will you get you results.\nCheckout /help to Read More__",
     reply_markup=InlineKeyboardMarkup([
         [ InlineKeyboardButton("🌐 Source Code", url="https://github.com/bipinkrish/Link-Bypasser-Bot")],
@@ -109,8 +140,8 @@ def docthread(message):
     print("sent DLC file")
     file = app.download_media(message)
     dlccont = open(file,"r").read()
-    link = bypasser.getlinks(dlccont)
-    app.edit_message_text(message.chat.id, msg.id, f'__{link}__', disable_web_page_preview=True)
+    links = bypasser.getlinks(dlccont)
+    app.edit_message_text(message.chat.id, msg.id, f'__{links}__', disable_web_page_preview=True)
     remove(file)
 
 
@@ -130,6 +161,5 @@ def docfile(client: pyrogram.client.Client, message: pyrogram.types.messages_and
 
 
 # server loop
-print("Bot STARTED")
-if __name__ == "__main__":
-    app.run()
+print("Bot Starting")
+app.run()
