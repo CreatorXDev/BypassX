@@ -205,8 +205,31 @@ def docthread(message):
 
 # files
 @app.on_message([filters.document,filters.photo,filters.video])
-def docfile(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    
+async def docfile(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    if UPDATES_CHANNEL != "None":
+        try:
+            user = await app.get_chat_member(UPDATES_CHANNEL, message.chat.id)
+            if user.status == enums.ChatMemberStatus.BANNED:
+                await app.send_message(
+                    chat_id=message.chat.id,
+                    text=f"__Sorry, you are banned. Contact My [Owner](https://telegram.me/{OWNER_USERNAME})__",
+                    disable_web_page_preview=True
+                )
+                return
+        except UserNotParticipant:
+            await app.send_message(
+                chat_id=message.chat.id,
+                text="<i>🔐 Join Channel To Use Me 🔐</i>",
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [
+                            InlineKeyboardButton("🔓 Join Now 🔓", url=f"https://t.me/{UPDATES_CHANNEL}")
+                        ]
+                    ]
+                )
+            )
+            return
+
     try:
         if message.document.file_name.endswith("dlc"):
             bypass = Thread(target=lambda:docthread(message),daemon=True)
