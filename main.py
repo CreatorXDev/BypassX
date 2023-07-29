@@ -116,7 +116,7 @@ async def send_start(client: Client, message: types.Message):
         except UserNotParticipant:
             await app.send_message(
                 chat_id=message.chat.id,
-                text="<i>🔐 Join Channel To Use Me 🔐</i>",
+                text=f"You Haven't Joined My Updates Channel\n\n Join It Using Below Link",
                 reply_markup=InlineKeyboardMarkup(
                     [
                         [
@@ -128,8 +128,7 @@ async def send_start(client: Client, message: types.Message):
             return
     await app.send_message(message.chat.id, f"__👋 Hi **{message.from_user.mention}**, I am Link Bypasser Bot, just send me any supported links and I will get you the results.\nCheckout /help to Read More__",
                            reply_markup=InlineKeyboardMarkup([
-                               [InlineKeyboardButton("OWNER", url="https://t.me/sai0909")],
-                               [InlineKeyboardButton("KINGS MIRROR", url="https://t.me/KINGS_MIRROR")]
+                               [InlineKeyboardButton("🥸 Owner", url="https://t.me/sai0909")]
                            ]),
                            reply_to_message_id=message.id)
 
