@@ -159,8 +159,7 @@ async def send_help(client: pyrogram.client.Client, message: pyrogram.types.mess
                 ),
             )
             return
-    await app.send_message(message.chat.id, HELP_TEXT, reply_to_message_id=message_id, disable_web_page_preview=True)
-
+    await app.send_message(message.chat.id, HELP_TEXT, reply_to_message_id=message.id, disable_web_page_preview=True)
 
 # links
 @app.on_message(filters.text)
