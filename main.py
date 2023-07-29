@@ -125,7 +125,6 @@ async def send_start(client: Client, message: Message):
             [InlineKeyboardButton("Replit", url="https://replit.com/@bipinkrish/Link-Bypasser#app.py")]
         ]),
         reply_to_message_id=message.id)
-    )
 
 
 # help command
