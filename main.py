@@ -17,11 +17,11 @@ from time import time
 with open('config.json', 'r') as f: DATA = load(f)
 def getenv(var): return environ.get(var) or DATA.get(var, None)
 
-bot_token = getenv("TOKEN")
-api_hash = getenv("HASH") 
-api_id = getenv("ID")
-app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token)  
+api_id = 1600998  # Replace with your API ID (integer)
+api_hash = 'c29b36c915c7da5ba3c30dfadc51bd73'  # Replace with your API Hash (string)
+bot_token = '6164457879:AAH7FxFX5F9hIAruioBtWN3GY610ZR2VuCk'  # Replace with your Bot API Token (string)
 
+app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
 # handle ineex
 def handleIndex(ele,message,msg):
