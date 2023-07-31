@@ -1,5 +1,3 @@
-Add inline buttons to the help text :
-
 gdrivetext = """__- appdrive \n\
 - driveapp \n\
 - drivehub \n\
