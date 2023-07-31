@@ -1350,7 +1350,7 @@ def toonworld(url:str):
     links = set()
     bypassLinks = set()
     episodeLinks = set()
-    resp = r.get(url).content
+    resp = requests.get(url).content
     soup = BeautifulSoup(resp, 'html.parser')
 
     singleLinks = soup.find_all(class_="mks_toggle_content")
@@ -1367,7 +1367,7 @@ def toonworld(url:str):
             episodeLinks.add(episode)
         if episodeLinks:
             for epl in episodeLinks:
-                res = r.get(epl).text
+                res = requests.get(epl).text
                 episodeSoup = BeautifulSoup(res, 'html.parser')
                 episodeSoup = episodeSoup.find_all('a', target="_blank")
                 for episodeSoup in episodeSoup:
@@ -1378,7 +1378,7 @@ def toonworld(url:str):
         raise Exception("No Links Found")
     
     for link in bypassLinks:
-        link = r.get(link).url
+        link = requests.get(link).url
         links.add(link)
         
     if links:
