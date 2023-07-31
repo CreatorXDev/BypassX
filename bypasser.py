@@ -8,7 +8,6 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 from lxml import etree
 import hashlib
 import json
-from time import sleep
 from asyncio import sleep as asleep
 import ddl
 from cfscrape import create_scraper
@@ -29,7 +28,7 @@ DCRYPT = getenv("DRIVEFIRE_CRYPT")
 KCRYPT = getenv("KOLOP_CRYPT")
 HCRYPT = getenv("HUBDRIVE_CRYPT")
 KATCRYPT = getenv("KATDRIVE_CRYPT")
-
+CF = getenv("CLOUDFLARE")
 
 ############################################################
 # Lists
@@ -142,25 +141,18 @@ def scrapeIndex(url, username="none", password="none"):
 ##############################################################
 # tnlink
 
-def tnlink(url):
-    client = requests.session()
-    DOMAIN = "https://page.tnlink.in/"
+def tnlink(url:str):
     url = url[:-1] if url[-1] == '/' else url
-    code = url.split("/")[-1]
-    final_url = f"{DOMAIN}/{code}"
-    ref = "https://usanewstoday.club/"
-    h = {"referer": ref}
-    while len(client.cookies) == 0:
-        resp = client.get(final_url,headers=h)
-        time.sleep(2)
-    soup = BeautifulSoup(resp.content, "html.parser")
-    inputs = soup.find_all("input")
+    token = url.split("/")[-1]
+    client = requests.Session()
+    domain = "https://internet.usanewstoday.club/"
+    response = client.get(domain+token)
+    soup = BeautifulSoup(response.content, "html.parser")
+    inputs = soup.find(id="go-link").find_all(name="input")
     data = { input.get('name'): input.get('value') for input in inputs }
-    h = { "x-requested-with": "XMLHttpRequest" }
-    time.sleep(8)
-    r = client.post(f"{DOMAIN}/links/go", data=data, headers=h)
-    try: return r.json()['url']
-    except: return "Something went wrong :("
+    sleep(8)
+    headers={"x-requested-with": "XMLHttpRequest"}
+    return client.post(domain+"links/go", data=data, headers=headers).json()["url"] 
 
 
 ###############################################################
@@ -196,16 +188,38 @@ def try2link_scrape(url):
     
 
 def psa_bypasser(psa_url):
-    client = cloudscraper.create_scraper(allow_brotli=False)
-    r = client.get(psa_url)
+    cookies = {'cf_clearance': CF }
+    headers = {
+        'authority': 'psa.wf',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'accept-language': 'en-US,en;q=0.9',
+        'referer': 'https://psa.wf/',
+        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
+    }
+
+    r = requests.get(psa_url, headers=headers, cookies=cookies)
     soup = BeautifulSoup(r.text, "html.parser").find_all(class_="dropshadowboxes-drop-shadow dropshadowboxes-rounded-corners dropshadowboxes-inside-and-outside-shadow dropshadowboxes-lifted-both dropshadowboxes-effect-default")
-    links = ""
+    links = []
     for link in soup:
         try:
             exit_gate = link.a.get("href")
-            links = links + try2link_scrape(exit_gate) + '\n'
+            if "/exit" in exit_gate:
+                print("scraping :",exit_gate)
+                links.append(try2link_scrape(exit_gate))
         except: pass
-    return links
+
+    finals = ""
+    for li in links:
+        try:
+            res = requests.get(li, headers=headers, cookies=cookies)
+            soup = BeautifulSoup(res.text,"html.parser")
+            name = soup.find("h1",class_="entry-title", itemprop="headline").getText()
+            finals += "**" + name + "**\n\n"
+            soup = soup.find("div", class_="entry-content" ,itemprop="text").findAll("a")
+            for ele in soup: finals += "○ " + ele.get("href") + "\n"
+            finals += "\n\n"
+        except: finals += li + "\n\n"
+    return finals
 
 
 ##################################################################################################################
@@ -257,14 +271,12 @@ def bypassBluemediafiles(url, torrent=False):
         'Sec-Fetch-Mode': 'navigate',
         'Sec-Fetch-Site': 'none',
         'Sec-Fetch-User': '?1',
-
     }
 
     res = requests.get(url, headers=headers)
     soup = BeautifulSoup(res.text, 'html.parser')
     script = str(soup.findAll('script')[3])
     encodedKey = script.split('Create_Button("')[1].split('");')[0]
-
 
     headers = {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:103.0) Gecko/20100101 Firefox/103.0',
@@ -293,7 +305,6 @@ def bypassBluemediafiles(url, torrent=False):
         if "mega.nz" in furl:
             furl = furl.replace("mega.nz/%23!","mega.nz/file/").replace("!","#")
 
-    #print(furl)
     return furl
 
 def igggames(url):
@@ -302,22 +313,35 @@ def igggames(url):
     soup = soup.find("div",class_="uk-margin-medium-top").findAll("a")
 
     bluelist = []
-    for ele in soup:
-        bluelist.append(ele.get('href'))
-    bluelist = bluelist[6:-1]
+    for ele in soup: bluelist.append(ele.get('href'))
+    bluelist = bluelist[3:-1]
 
     links = ""
+    last  = None
+    fix = True
     for ele in bluelist:
-        if "bluemediafiles" in ele:
-            links = links + bypassBluemediafiles(ele) + "\n"
+        if ele == "https://igg-games.com/how-to-install-a-pc-game-and-update.html": 
+            fix = False
+            links += "\n"
+        if "bluemediafile" in ele:
+            tmp = bypassBluemediafiles(ele)
+            if fix:
+                tt = tmp.split("/")[2]
+                if last is not None and tt != last: links += "\n"
+                last = tt
+            links = links + "○ " + tmp + "\n"
         elif "pcgamestorrents.com" in ele:
             res = requests.get(ele)
             soup = BeautifulSoup(res.text,"html.parser")
             turl = soup.find("p",class_="uk-card uk-card-body uk-card-default uk-card-hover").find("a").get("href")
-            links = links + bypassBluemediafiles(turl,True) + "\n"
-        else:
-            links = links + ele + "\n"
-
+            links = links + "🧲 ```" + bypassBluemediafiles(turl,True) + "```\n\n"
+        elif ele != "https://igg-games.com/how-to-install-a-pc-game-and-update.html":
+            if fix:
+                tt = ele.split("/")[2]
+                if last is not None and tt != last: links += "\n"
+                last = tt
+            links = links + "○ " + ele + "\n"
+       
     return links[:-1]
 
 
@@ -450,23 +474,6 @@ def scrappers(link):
             title = soupt.select('meta[property^="og:description"]')
             no += 1
             gd_txt += f"{no}. {(title[0]['content']).replace('Download ' , '')}\n{glink}\n\n"
-        return gd_txt
-    
-    elif "toonworld4all" in link:
-        gd_txt, no = "", 0
-        r = requests.get(link)
-        soup = BeautifulSoup(r.text, "html.parser")
-        links = soup.select('a[href*="redirect/main.php?"]')
-        for a in links:
-            down = requests.get(a['href'], stream=True, allow_redirects=False)
-            link = down.headers["location"]
-            glink = rocklinks(link)
-            if glink and "gdtot" in glink:
-                t = requests.get(glink)
-                soupt = BeautifulSoup(t.text, "html.parser")
-                title = soupt.select('meta[property^="og:description"]')
-                no += 1
-                gd_txt += f"{no}. {(title[0]['content']).replace('Download ' , '')}\n{glink}\n\n"
         return gd_txt
     
     elif "animeremux" in link:
@@ -1321,11 +1328,15 @@ def droplink(url):
 #####################################################################################################################
 # link vertise
 
-def linkvertise(url):
-    params = {'url': url,}
-    response = requests.get('https://bypass.pm/bypass2', params=params).json()
-    if response["success"]: return response["destination"]
-    else: return response["msg"]
+def linkvertise(url: str):
+    API = 'https://bypass.pm/bypass2?url='
+    s = requests.Session()
+    r = s.get(API+url)
+    result = r.json()
+    if result['success'] == True:
+        return result['destination']
+    elif result['success'] == False:
+        return 'Link do not have a destination link try in browser'
 
 
 ###################################################################################################################
@@ -1335,12 +1346,52 @@ def others(url):
     return "API Currently not Available"
 
 
+def toonworld(url:str):
+    links = set()
+    bypassLinks = set()
+    episodeLinks = set()
+    resp = r.get(url).content
+    soup = BeautifulSoup(resp, 'html.parser')
+
+    singleLinks = soup.find_all(class_="mks_toggle_content")
+    for singleLinks in singleLinks:
+        singleLinks = singleLinks.find_all("a")
+        for singleLinks in singleLinks:
+            singleLinks = singleLinks.get("href")
+            bypassLinks.add(singleLinks)
+
+    episode = soup.find_all("a", class_="mks_button mks_button_medium squared")
+    if len(episode) != 0:
+        for episode in episode:
+            episode = episode.get("href")
+            episodeLinks.add(episode)
+        if episodeLinks:
+            for epl in episodeLinks:
+                res = r.get(epl).text
+                episodeSoup = BeautifulSoup(res, 'html.parser')
+                episodeSoup = episodeSoup.find_all('a', target="_blank")
+                for episodeSoup in episodeSoup:
+                    episodeLink = episodeSoup.get('href')
+                    bypassLinks.add(episodeLink)
+
+    if not bypassLinks:
+        raise Exception("No Links Found")
+    
+    for link in bypassLinks:
+        link = r.get(link).url
+        links.add(link)
+        
+    if links:
+        return list(links) 
+    else:   
+        raise Exception("No Links Found")
+	    
 #################################################################################################################
 # ouo
 
 # RECAPTCHA v3 BYPASS
 # code from https://github.com/xcscxr/Recaptcha-v3-bypass
-def RecaptchaV3(ANCHOR_URL="https://www.google.com/recaptcha/api2/anchor?ar=1&k=6Lcr1ncUAAAAAH3cghg6cOTPGARa8adOf-y9zv2x&co=aHR0cHM6Ly9vdW8uaW86NDQz&hl=en&v=1B_yv3CBEV10KtI2HJ6eEXhJ&size=invisible&cb=4xnsug1vufyr"):
+def RecaptchaV3(ANCHOR_URL):
     url_base = 'https://www.google.com/recaptcha/'
     post_data = "v={}&reason=q&c={}&k={}&co={}"
     client = requests.Session()
@@ -1355,36 +1406,30 @@ def RecaptchaV3(ANCHOR_URL="https://www.google.com/recaptcha/api2/anchor?ar=1&k=
     params = dict(pair.split('=') for pair in params.split('&'))
     post_data = post_data.format(params["v"], token, params["k"], params["co"])
     res = client.post(url_base+'reload', params=f'k={params["k"]}', data=post_data)
-    answer = re.findall(r'"rresp","(.*?)"', res.text)[0]    
-    return answer
+    return re.findall(r'"rresp","(.*?)"', res.text)[0]
+
+ANCHOR_URL = 'https://www.google.com/recaptcha/api2/anchor?ar=1&k=6Lcr1ncUAAAAAH3cghg6cOTPGARa8adOf-y9zv2x&co=aHR0cHM6Ly9vdW8uaW86NDQz&hl=en&v=1B_yv3CBEV10KtI2HJ6eEXhJ&size=invisible&cb=4xnsug1vufyr'
 
 
 # code from https://github.com/xcscxr/ouo-bypass/
-def ouo(url):
+def ouo_bypass(url: str):
     client = requests.Session()
     tempurl = url.replace("ouo.press", "ouo.io")
     p = urlparse(tempurl)
-    id = tempurl.split('/')[-1]
-    
+    id_ = tempurl.split('/')[-1]
     res = client.get(tempurl)
-    next_url = f"{p.scheme}://{p.hostname}/go/{id}"
-
+    next_url = f"{p.scheme}://{p.hostname}/go/{id_}"
     for _ in range(2):
         if res.headers.get('Location'):
             break
-        bs4 = BeautifulSoup(res.content, 'lxml')
+        bs4 = BeautifulSoup(res.content, 'html.parser')
         inputs = bs4.form.findAll("input", {"name": re.compile(r"token$")})
         data = { input.get('name'): input.get('value') for input in inputs }
-        
-        ans = RecaptchaV3()
-        data['x-token'] = ans
-        h = {
-            'content-type': 'application/x-www-form-urlencoded'
-        }
-        res = client.post(next_url, data=data, headers=h, allow_redirects=False)
-        next_url = f"{p.scheme}://{p.hostname}/xreallcygo/{id}"
-
-    return res.headers.get('Location')
+        ans = RecaptchaV3(ANCHOR_URL)
+        data['x-token'] = ans        
+        res = client.post(next_url, data=data, headers={'content-type': 'application/x-www-form-urlencoded'}, allow_redirects=False)
+        next_url = f"{p.scheme}://{p.hostname}/xreallcygo/{id_}"
+    return str(res.headers.get("Location"))
 
 
 ####################################################################################################################        
@@ -1681,23 +1726,23 @@ def adrinolink (url):
 #####################################################################################################
 # mdiskshortners
 
-"""
-https?://(mdisk\.me\/convertor)\S+
-https://mdisk.me/convertor/53x30/vNv9FC
-"""
-
-
-def mdiskshortners(url: str):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36"
-    }
+def mdiskshortners(url):
+    client = cloudscraper.create_scraper(allow_brotli=False)
+    DOMAIN = "https://mdiskshortners.in/"
     url = url[:-1] if url[-1] == '/' else url
-    token = url.split("/")[-1]
-    api = f"https://diskuploader.entertainvideo.com/v1/file/cdnurl?param={token}"
-    response = requests.get(api, headers=headers).json() 
-    download_url = str(response["download"])
-    download_url = download_url.replace(" ", "%20").replace('mxv_download', 'dash').replace('mp4', 'mpd')
-    return download_url
+    code = url.split("/")[-1]
+    final_url = f"{DOMAIN}/{code}"
+    ref = "https://www.adzz.in/"
+    h = {"referer": ref}
+    resp = client.get(final_url,headers=h)
+    soup = BeautifulSoup(resp.content, "html.parser")
+    inputs = soup.find_all("input")
+    data = { input.get('name'): input.get('value') for input in inputs }
+    h = { "x-requested-with": "XMLHttpRequest" }
+    time.sleep(2)
+    r = client.post(f"{DOMAIN}/links/go", data=data, headers=h)
+    try: return r.json()['url']
+    except: return "Something went wrong :("
 
 
 ##################################################################################################### 
@@ -2053,7 +2098,7 @@ def shortners(url):
         return sh_st_bypass(url)
         
     # psa
-    elif "https://psa.pm/" in url:
+    elif "https://psa.wf/" in url:
         print("entered psa: ",url)
         return psa_bypasser(url)
         
@@ -2215,10 +2260,14 @@ def shortners(url):
     elif "thinfi.com" in url:
         print("entered thinfi: ",url)
         return thinfi(url)
-        
+
+    elif "toonworld4all.me" in url:
+        print("entered toonworld: ",url)
+        return toonworld(url)
+	    
     # htpmovies sharespark cinevood
     elif "https://htpmovies." in url or 'https://sharespark.me/' in url or "https://cinevood." in url or "https://atishmkv." in url \
-        or "https://teluguflix" in url or 'https://taemovies' in url or "https://toonworld4all" in url or "https://animeremux" in url:
+        or "https://teluguflix" in url or 'https://taemovies' in url or "https://animeremux" in url:
         print("entered htpmovies sharespark cinevood atishmkv: ",url)
         return scrappers(url)
 
